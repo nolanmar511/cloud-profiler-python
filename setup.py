@@ -36,7 +36,7 @@ ext_module = [
         include_dirs=['googlecloudprofiler/src'],
         language='c++',
         extra_compile_args=['-std=c++11'],
-        extra_link_args=['-std=c++11', '-static-libstdc++'])
+        extra_link_args=[''])
 ]
 
 if not (sys.platform.startswith('linux') or sys.platform.startswith('darwin')):
