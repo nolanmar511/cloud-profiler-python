@@ -206,6 +206,36 @@ class Client(object):
     if discovery_service_url:
       self._discovery_service_url = discovery_service_url
 
+  def startOffline(self):
+    """ Starts collecting profiles in a tight loop.
+    """
+    if self._started:
+      logger.warning('Profiler already started, will not start again')
+      return
+
+    if 'WALL' in self._profilers:
+      self._profilers['WALL'].register_handler()
+    self._polling_thread = threading.Thread(target=self._profile_in_loop)
+    self._polling_thread.name = 'Profiler API polling thread'
+    self._polling_thread.daemon = True
+    self._polling_thread.start()
+
+  def _profile_in_loop(self):
+    """Collects profiles in a tight loop"""
+    while True:
+      for profile_type, profiler in self._profilers.items():
+        try:
+          logger.info('Collecting %s profile', profile_type)
+          duration_ns = 1 * _NANOS_PER_SEC
+          profile_bytes = profiler.profile(duration_ns)
+          logger.info('Collected %s profile', profile_type)
+          base64.b64encode(profile_bytes).decode('UTF-8')
+          logger.info('Encoded %s profile', profile_type)
+        except BaseException:  # pylint: disable=broad-except
+          logger.error(
+              'Failed to collect profile whose profile type is %s: %s',
+              profile_type, traceback.format_exc())
+
   def start(self):
     """Starts collecting profiles.
 

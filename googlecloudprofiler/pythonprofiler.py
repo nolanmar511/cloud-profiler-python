@@ -81,7 +81,8 @@ class WallProfiler(object):
       period_ms: An integer specifying the sampling interval in milliseconds.
     """
     self._profile_type = 'wall'
-    self._period_sec = float(period_ms) / 1000
+    # Use 100us instead.
+    self._period_sec = float(100) / 1000 / 1000
     self._traces = collections.defaultdict(int)
     self._in_handler = False
     self._started = False

@@ -54,6 +54,7 @@ class CPUProfiler(object):
 
   def _build_profile(self, duration_ns, traces):
     profile_builder = builder.Builder()
+    # Ignore _period_ms and set sampling interval to 100us
     profile_builder.populate_profile(traces, self._profile_type, 'nanoseconds',
-                                     self._period_ms * 1000 * 1000, duration_ns)
+                                     100 * 1000, duration_ns)
     return profile_builder.emit()

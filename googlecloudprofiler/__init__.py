@@ -122,12 +122,13 @@ def start(service=None,
         'Python version is 3.2.', sys.version_info[0], sys.version_info[1])
 
   profiler_client = client.Client()
+
   project_id = profiler_client.setup_auth(project_id, service_account_json_file)
   profiler_client.config(project_id, service, service_version,
                          disable_cpu_profiling, disable_wall_profiling,
                          period_ms, discovery_service_url)
-  logger.info('Google Cloud Profiler Python agent version: %s',
+  logger.info('Google Cloud Profiler Python agent version: local-%s',
               version.__version__)
-  profiler_client.start()
+  profiler_client.startOffline()
 
   _started = True
