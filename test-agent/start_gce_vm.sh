@@ -13,7 +13,7 @@ gcloud compute project-info add-metadata \
     --metadata serial-port-logging-enable=true \
     --project="$PROJECT_ID"
 
-gcloud compute instances create run-python-bench2 \
+gcloud compute instances create run-python3-5-9-bench-15 \
   --metadata-from-file startup-script=start_bench.sh \
   --project="$PROJECT_ID" \
   --zone=us-central1-a \

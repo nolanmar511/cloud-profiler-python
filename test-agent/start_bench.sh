@@ -13,12 +13,24 @@ set -eo pipefail
 set -x
 
 # Install dependencies.
-# ppa:deadsnakes/ppa contains desired Python versions.
-retry add-apt-repository -y ppa:deadsnakes/ppa >/dev/null
 # Force IPv4 to prevent long IPv6 timeouts.
 # TODO : Validate this solves the issue. Remove if not.
 retry apt-get -o Acquire::ForceIPv4=true update >/dev/null
-retry apt-get -o Acquire::ForceIPv4=true install -yq git build-essential python3-distutils python3.5-dev python3.5 >/dev/ttyS2
+# Second line is pyenv dependencies
+retry apt-get -o Acquire::ForceIPv4=true install -yq git build-essential \
+make libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev wget curl llvm libncurses5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev >/dev/ttyS2
+
+# Install Python
+retry curl https://pyenv.run | bash
+export PATH="$HOME/.pyenv/bin:$PATH"
+eval "$(pyenv init -)"
+eval "$(pyenv virtualenv-init)"
+
+pyenv install 3.5.9
+pyenv global 3.5.9
+python3.5 --version
+export PATH="$HOME/.pyenv/versions/3.5.9/lib/python3.5/site-packages:$PATH"
+
 
 # Install Python dependencies.
 retry wget -O /tmp/get-pip.py "https://bootstrap.pypa.io/2.7/get-pip.py" >/dev/null
@@ -27,8 +39,6 @@ retry python3.5 -m pip install --upgrade pyasn1 >/dev/null
 
 # Setup pipenv
 retry python3.5 -m pip install pipenv > /dev/null
-mkdir bench && cd bench
-retry pipenv install > /dev/null
 
 # Fetch agent.
 retry apt-get update
@@ -50,9 +60,9 @@ cp -r cloud-profiler-python/test-agent .
 cd test-agent
 
 # Install agent.
-retry pipenv run python3.5 -m pip install --ignore-installed "$AGENT_PATH"
+retry python3.5 -m pip install --ignore-installed "$AGENT_PATH"
 
 # Run bench app.
-pipenv run python3.5 bench.py
+python3.5 bench.py
 
 # Wait for agent to stop due to some error.
